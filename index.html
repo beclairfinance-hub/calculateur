@@ -1,0 +1,480 @@
+<!doctype html><html lang="fr-CA"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="description" content="Calculateur d'épargne gratuit BeClair Finance : épargner, faire grandir, atteindre un objectif, suivre son mois.">
+<title>Calculateur d'épargne BeClair</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
+<style>
+/* Mise en page : 4 outils dans des onglets ; à gauche les réglages, à droite le résultat. Le chiffre clé est toujours le héros. */
+:root{
+  --navy:#101B35; --navy-2:#16244A; --navy-3:#1F3160; --line:#2A3D70;
+  --green:#42D878; --green-soft:rgba(66,216,120,.14); --blue:#4285F4; --blue-soft:rgba(66,133,244,.22);
+  --red:#F0868D; --red-soft:rgba(240,134,141,.12);
+  --ink:#F5F7FA; --muted:#A9B6D3; --faint:#7384AB;
+  --font:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{background:var(--navy);color:var(--ink)}
+body{font-family:var(--font);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1040px;margin:0 auto;padding-block:28px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.2px}
+.tag{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+h1{font-size:clamp(28px,5vw,44px);line-height:1.08;font-weight:900;letter-spacing:-.02em;margin:22px 0 6px;text-wrap:balance}
+h1 em{font-style:normal;color:var(--green)}
+.lede{color:var(--muted);max-width:62ch;margin:0 0 20px}
+.modes{display:flex;flex-wrap:wrap;background:var(--navy-2);border:1px solid var(--line);border-radius:18px;padding:4px;gap:4px;margin-bottom:18px;width:fit-content;max-width:100%}
+.modes button{font:inherit;font-weight:600;font-size:14px;color:var(--muted);background:transparent;border:0;border-radius:14px;padding:9px 14px;cursor:pointer}
+.modes button[aria-pressed="true"]{background:var(--green);color:var(--navy)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:20px;align-items:start}
+@media (max-width:820px){.grid{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--navy-2);border:1px solid var(--line);border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:20px;min-width:0}
+.field{display:flex;flex-direction:column;gap:8px}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+label,.lab{font-weight:600;font-size:15px}
+.val{font-variant-numeric:tabular-nums;font-weight:800;font-size:20px;white-space:nowrap}
+.hint{font-size:13px;color:var(--faint)}
+input[type=range]{width:100%;accent-color:var(--green);height:28px}
+.num{display:flex;align-items:center;background:var(--navy);border:1px solid var(--line);border-radius:12px;padding:0 12px}
+.num input{width:100%;min-width:0;font:inherit;font-size:18px;font-weight:700;color:var(--ink);background:transparent;border:0;padding:12px 0;font-variant-numeric:tabular-nums}
+.num span{color:var(--muted);font-weight:600}
+select{font:inherit;font-weight:600;color:var(--ink);background:var(--navy);border:1px solid var(--line);border-radius:12px;padding:12px}
+.chips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.chip{font:inherit;text-align:left;background:var(--navy);border:1px solid var(--line);border-radius:14px;padding:10px 12px;color:var(--ink);cursor:pointer;display:flex;flex-direction:column;gap:2px}
+.chip b{font-size:17px;font-variant-numeric:tabular-nums}
+.chip small{color:var(--muted);font-size:12px}
+.chip[aria-pressed="true"]{border-color:var(--green);background:var(--green-soft)}
+.switch{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--muted);cursor:pointer}
+.switch input{width:18px;height:18px;accent-color:var(--blue)}
+.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+.hero{font-size:clamp(40px,8vw,68px);font-weight:900;line-height:1.02;letter-spacing:-.03em;color:var(--green);font-variant-numeric:tabular-nums}
+.sentence{font-size:16px;max-width:54ch;margin:0}
+.sentence b{color:var(--green)}
+.split{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0}
+.split div{background:var(--navy);border:1px solid var(--line);border-radius:14px;padding:12px;min-width:0}
+.split dt{font-size:12px;color:var(--muted)}
+.split dd{margin:2px 0 0;font-weight:800;font-size:18px;font-variant-numeric:tabular-nums}
+.k-blue{color:var(--blue)} .k-green{color:var(--green)} .k-red{color:var(--red)}
+.chart{width:100%;height:auto;display:block}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.boost{background:var(--green-soft);border:1px solid rgba(66,216,120,.35);border-radius:14px;padding:14px;font-size:15px}
+.boost b{color:var(--green)}
+.feebox{background:var(--red-soft);border:1px solid rgba(240,134,141,.35);border-radius:14px;padding:12px 14px;font-size:14px}
+.ring{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.ring svg{flex:none}
+.bar{height:12px;background:var(--navy);border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.bar span{display:block;height:100%;background:var(--green);border-radius:999px}
+.cats{display:flex;flex-direction:column;gap:10px}
+.cat{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:center}
+.cat .bar{grid-column:1 / -1;height:8px}
+.cat .bar span{background:var(--blue)}
+.entries{display:flex;flex-direction:column;gap:6px;max-height:240px;overflow:auto}
+.entry{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;background:var(--navy);border:1px solid var(--line);border-radius:12px;padding:8px 10px;font-size:14px}
+.entry .amt{font-weight:700;font-variant-numeric:tabular-nums}
+.entry button{font:inherit;font-size:13px;color:var(--muted);background:transparent;border:1px solid var(--line);border-radius:8px;padding:3px 8px;cursor:pointer}
+.add{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) auto;gap:8px}
+@media (max-width:460px){.add{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.add .btn{grid-column:1 / -1}}
+.btn{font:inherit;font-weight:700;background:var(--green);color:var(--navy);border:0;border-radius:12px;padding:12px 16px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}
+.btn.danger{background:var(--red);color:var(--navy)}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{font:inherit;font-size:14px;font-weight:600;background:var(--navy);color:var(--muted);border:1px solid var(--line);border-radius:10px;padding:8px 12px;cursor:pointer}
+.seg button[aria-pressed="true"]{border-color:var(--green);color:var(--ink);background:var(--green-soft)}
+.empty{color:var(--faint);font-size:14px;padding:6px 2px}
+.privacy{font-size:13px;color:var(--muted);background:var(--navy);border:1px dashed var(--line);border-radius:12px;padding:10px 12px}
+.confirm{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:14px}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:22px}
+@media (max-width:820px){.steps{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:460px){.split{grid-template-columns:minmax(0,1fr)}.chips{grid-template-columns:minmax(0,1fr)}}
+.step{background:var(--navy-2);border:1px solid var(--line);border-radius:16px;padding:16px}
+.step h3{margin:0 0 4px;font-size:16px}
+.step p{margin:0;color:var(--muted);font-size:14px}
+.step .n{display:inline-flex;width:26px;height:26px;border-radius:50%;background:var(--green);color:var(--navy);font-weight:800;align-items:center;justify-content:center;font-size:14px;margin-bottom:8px}
+footer{margin-top:26px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;color:var(--faint);font-size:13px}
+.share{font:inherit;font-weight:700;background:var(--ink);color:var(--navy);border:0;border-radius:999px;padding:11px 18px;cursor:pointer}
+.small{font-size:12px;color:var(--faint);max-width:72ch}
+</style>
+<style>body{margin:0}</style></head><body>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <svg width="30" height="26" viewBox="0 0 30 26" aria-hidden="true"><rect x="0" y="16" width="6" height="10" rx="1.5" fill="#F5F7FA"/><rect x="8" y="10" width="6" height="16" rx="1.5" fill="#F5F7FA"/><rect x="16" y="5" width="6" height="21" rx="1.5" fill="#42D878"/><rect x="24" y="0" width="6" height="26" rx="1.5" fill="#42D878"/></svg>
+      BeClair Finance
+    </div>
+    <span class="tag">Calculateur gratuit</span>
+  </header>
+
+  <h1 id="title"></h1>
+  <p class="lede" id="lede"></p>
+
+  <div class="modes" role="group" aria-label="Choisis un outil">
+    <button data-mode="save" aria-pressed="true">Épargner</button>
+    <button data-mode="grow" aria-pressed="false">Faire grandir</button>
+    <button data-mode="goal" aria-pressed="false">Atteindre un objectif</button>
+    <button data-mode="track" aria-pressed="false">Suivre mon mois</button>
+  </div>
+
+  <!-- 1. ÉPARGNER SIMPLEMENT -->
+  <div class="grid" id="v-save">
+    <section class="panel" aria-label="Réglages épargne">
+      <div class="field">
+        <span class="lab">Je veux mettre de côté pour</span>
+        <div class="seg" id="s-kind" role="group" aria-label="Objectif">
+          <button data-kind="urgence" aria-pressed="true">Fonds d'urgence</button>
+          <button data-kind="voyage" aria-pressed="false">Voyage</button>
+          <button data-kind="maison" aria-pressed="false">Mise de fonds</button>
+          <button data-kind="autre" aria-pressed="false">Autre</button>
+        </div>
+      </div>
+      <div class="field" id="s-exp-field">
+        <label for="s-exp">Mes dépenses essentielles par mois</label>
+        <div class="num"><input id="s-exp" type="number" inputmode="numeric" min="0" step="50" value="2500"><span>$</span></div>
+        <div class="seg" id="s-months" role="group" aria-label="Nombre de mois">
+          <button data-m="3" aria-pressed="true">3 mois</button>
+          <button data-m="6" aria-pressed="false">6 mois</button>
+        </div>
+        <span class="hint">Loyer, épicerie, transport, factures : ce qu'il faut pour vivre si le revenu s'arrête.</span>
+      </div>
+      <div class="field" id="s-goal-field" hidden>
+        <label for="s-goal">Mon objectif</label>
+        <div class="num"><input id="s-goal" type="number" inputmode="numeric" min="0" step="100" value="3000"><span>$</span></div>
+      </div>
+      <div class="field">
+        <div class="row"><label for="s-monthly">Je mets de côté chaque mois</label><span class="val" id="s-v-monthly"></span></div>
+        <input id="s-monthly" type="range" min="25" max="2000" step="25" value="250">
+      </div>
+      <div class="field">
+        <label for="s-have">J'ai déjà</label>
+        <div class="num"><input id="s-have" type="number" inputmode="numeric" min="0" step="50" value="500"><span>$</span></div>
+      </div>
+    </section>
+    <section class="panel" aria-live="polite" aria-label="Résultat épargne">
+      <div><div class="eyebrow" id="s-eyebrow"></div><div class="hero" id="s-hero"></div></div>
+      <p class="sentence" id="s-sentence"></p>
+      <div class="ring">
+        <svg width="132" height="132" viewBox="0 0 132 132" aria-hidden="true"><circle cx="66" cy="66" r="54" fill="none" stroke="#2A3D70" stroke-width="14"/><circle id="s-arc" cx="66" cy="66" r="54" fill="none" stroke="#42D878" stroke-width="14" stroke-linecap="round" transform="rotate(-90 66 66)" stroke-dasharray="339.3" stroke-dashoffset="339.3"/><text id="s-pct" x="66" y="74" text-anchor="middle" font-size="26" font-weight="900" fill="#F5F7FA" font-family="Inter,sans-serif">0 %</text></svg>
+        <dl class="split" style="flex:1;min-width:0;grid-template-columns:minmax(0,1fr)">
+          <div><dt>Objectif</dt><dd id="s-target"></dd></div>
+          <div><dt>Il reste</dt><dd class="k-blue" id="s-left"></dd></div>
+        </dl>
+      </div>
+      <div class="boost" id="s-boost"></div>
+    </section>
+  </div>
+
+  <!-- 2. FAIRE GRANDIR -->
+  <div class="grid" id="v-grow" hidden>
+    <section class="panel" aria-label="Réglages croissance">
+      <div class="field">
+        <div class="row"><label for="g-monthly">Je mets de côté chaque mois</label><span class="val" id="g-v-monthly"></span></div>
+        <input id="g-monthly" type="range" min="25" max="2000" step="25" value="200">
+        <span class="hint">Même 25 $ par mois, c'est un début.</span>
+      </div>
+      <div class="field">
+        <div class="row"><label for="g-years">Pendant</label><span class="val" id="g-v-years"></span></div>
+        <input id="g-years" type="range" min="1" max="40" step="1" value="20">
+      </div>
+      <div class="field">
+        <label for="g-start">J'ai déjà de côté</label>
+        <div class="num"><input id="g-start" type="number" inputmode="numeric" min="0" step="100" value="0"><span>$</span></div>
+      </div>
+      <div class="field">
+        <span class="lab" id="g-rate-label">Si ça rapporte chaque année</span>
+        <div class="chips" data-group="rate" role="group" aria-labelledby="g-rate-label">
+          <button class="chip" data-rate="3" aria-pressed="false"><b>3 %</b><small>Prudent</small></button>
+          <button class="chip" data-rate="5" aria-pressed="false"><b>5 %</b><small>Équilibré</small></button>
+          <button class="chip" data-rate="6" aria-pressed="true"><b>6 %</b><small>Croissance</small></button>
+        </div>
+        <span class="hint">Un rendement varie d'une année à l'autre ; ces taux servent à comparer des scénarios.</span>
+      </div>
+      <label class="switch"><input id="g-fees" type="checkbox"> Montrer l'effet de frais de 2 %/an (fonds communs typiques)</label>
+    </section>
+    <section class="panel" aria-live="polite" aria-label="Résultat croissance">
+      <div><div class="eyebrow" id="g-eyebrow"></div><div class="hero" id="g-hero"></div></div>
+      <p class="sentence" id="g-sentence"></p>
+      <dl class="split">
+        <div><dt>Tu verses</dt><dd class="k-blue" id="g-paid"></dd></div>
+        <div><dt>Les intérêts ajoutent</dt><dd class="k-green" id="g-gain"></dd></div>
+        <div><dt>Par jour</dt><dd id="g-day"></dd></div>
+      </dl>
+      <div>
+        <svg class="chart" id="g-chart" viewBox="0 0 560 230" role="img" aria-label="Croissance année par année"></svg>
+        <div class="legend"><span><i style="background:var(--blue)"></i>Ce que tu verses</span><span><i style="background:var(--green)"></i>Intérêts composés</span></div>
+      </div>
+      <div class="boost" id="g-boost"></div>
+      <div class="feebox" id="g-feebox" hidden></div>
+    </section>
+  </div>
+
+  <!-- 3. OBJECTIF AVEC PLACEMENT -->
+  <div class="grid" id="v-goal" hidden>
+    <section class="panel" aria-label="Réglages objectif">
+      <div class="field">
+        <label for="o-goal">Mon objectif</label>
+        <div class="num"><input id="o-goal" type="number" inputmode="numeric" min="1000" step="500" value="50000"><span>$</span></div>
+        <span class="hint">Mise de fonds, études des enfants, retraite… à toi de choisir.</span>
+      </div>
+      <div class="field">
+        <div class="row"><label for="o-years">Dans</label><span class="val" id="o-v-years"></span></div>
+        <input id="o-years" type="range" min="1" max="40" step="1" value="15">
+      </div>
+      <div class="field">
+        <label for="o-start">J'ai déjà de côté</label>
+        <div class="num"><input id="o-start" type="number" inputmode="numeric" min="0" step="100" value="2000"><span>$</span></div>
+      </div>
+      <div class="field">
+        <span class="lab" id="o-rate-label">Si ça rapporte chaque année</span>
+        <div class="chips" data-group="rate" role="group" aria-labelledby="o-rate-label">
+          <button class="chip" data-rate="3" aria-pressed="false"><b>3 %</b><small>Prudent</small></button>
+          <button class="chip" data-rate="5" aria-pressed="true"><b>5 %</b><small>Équilibré</small></button>
+          <button class="chip" data-rate="6" aria-pressed="false"><b>6 %</b><small>Croissance</small></button>
+        </div>
+      </div>
+    </section>
+    <section class="panel" aria-live="polite" aria-label="Résultat objectif">
+      <div><div class="eyebrow" id="o-eyebrow"></div><div class="hero" id="o-hero"></div></div>
+      <p class="sentence" id="o-sentence"></p>
+      <dl class="split">
+        <div><dt>Tu verses</dt><dd class="k-blue" id="o-paid"></dd></div>
+        <div><dt>Les intérêts ajoutent</dt><dd class="k-green" id="o-gain"></dd></div>
+        <div><dt>Sans placement</dt><dd id="o-flat"></dd></div>
+      </dl>
+      <div class="boost" id="o-boost"></div>
+    </section>
+  </div>
+
+  <!-- 4. SUIVRE MON MOIS -->
+  <div class="grid" id="v-track" hidden>
+    <section class="panel" aria-label="Saisie du mois">
+      <div class="row"><span class="lab" id="t-month"></span><button class="btn ghost" id="t-sample" type="button">Voir un exemple</button></div>
+      <div class="field">
+        <label for="t-income">Mon revenu net ce mois-ci</label>
+        <div class="num"><input id="t-income" type="number" inputmode="numeric" min="0" step="50" placeholder="ex. 3 500"><span>$</span></div>
+      </div>
+      <div class="field">
+        <label for="t-goal">Mon objectif d'épargne ce mois-ci</label>
+        <div class="num"><input id="t-goal" type="number" inputmode="numeric" min="0" step="25" placeholder="ex. 350"><span>$</span></div>
+      </div>
+      <form class="field" id="t-form">
+        <span class="lab">Ajouter une ligne</span>
+        <div class="add">
+          <select id="t-cat" aria-label="Catégorie">
+            <option value="Épargne">💚 Épargne</option>
+            <option value="Logement">Logement</option>
+            <option value="Épicerie">Épicerie</option>
+            <option value="Transport">Transport</option>
+            <option value="Factures">Factures</option>
+            <option value="Restos et sorties">Restos et sorties</option>
+            <option value="Achats">Achats</option>
+            <option value="Dettes">Dettes</option>
+            <option value="Autre">Autre</option>
+          </select>
+          <div class="num"><input id="t-amt" type="number" inputmode="decimal" min="0" step="0.01" placeholder="Montant" aria-label="Montant"><span>$</span></div>
+          <button class="btn" type="submit">Ajouter</button>
+        </div>
+      </form>
+      <div class="field">
+        <span class="lab">Mes lignes</span>
+        <div class="entries" id="t-list"></div>
+      </div>
+      <div class="confirm" id="t-reset-zone"><button class="btn ghost" id="t-reset" type="button">Recommencer le mois</button></div>
+      <p class="privacy">🔒 Tes chiffres restent dans ton navigateur, sur cet appareil. Rien n'est envoyé à BeClair ni à personne.</p>
+    </section>
+    <section class="panel" aria-live="polite" aria-label="Bilan du mois">
+      <div><div class="eyebrow">Épargné ce mois-ci</div><div class="hero" id="t-hero">0 $</div></div>
+      <p class="sentence" id="t-sentence"></p>
+      <div class="field">
+        <div class="row"><span class="lab">Objectif du mois</span><span class="val" id="t-goal-pct">0 %</span></div>
+        <div class="bar"><span id="t-goal-bar" style="width:0%"></span></div>
+      </div>
+      <dl class="split">
+        <div><dt>Revenu</dt><dd id="t-inc">0 $</dd></div>
+        <div><dt>Dépensé</dt><dd class="k-red" id="t-spent">0 $</dd></div>
+        <div><dt>Il reste</dt><dd class="k-blue" id="t-left">0 $</dd></div>
+      </dl>
+      <div class="field">
+        <span class="lab">Où va ton argent</span>
+        <div class="cats" id="t-cats"></div>
+      </div>
+      <div class="boost" id="t-boost"></div>
+    </section>
+  </div>
+
+  <div class="steps">
+    <div class="step"><span class="n">1</span><h3>Un coussin d'abord</h3><p>Un petit fonds d'urgence évite de piger dans ton épargne au premier imprévu.</p></div>
+    <div class="step"><span class="n">2</span><h3>Automatique, le jour de la paie</h3><p>Un virement programmé : l'argent part avant que tu aies le temps de le dépenser.</p></div>
+    <div class="step"><span class="n">3</span><h3>Le bon compte</h3><p>Un Céli (TFSA) garde les gains à l'abri de l'impôt. Compare les frais avant de choisir.</p></div>
+  </div>
+
+  <footer>
+    <span>Suis <b style="color:var(--ink)">@beclairfinance</b> pour d'autres calculs comme celui-ci.</span>
+    <button class="share" id="share" type="button">Copier mon résultat</button>
+  </footer>
+  <p class="small">Calculs : versements à la fin de chaque mois, intérêts composés chaque mois, avant impôt et frais (sauf si l'option des frais est cochée), sans inflation. Les comptes d'épargne simples sont calculés sans intérêts.</p>
+</div>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const NB = ' ';
+  const fmt = v => Math.round(v).toLocaleString('fr-CA').replace(/ | |\s/g, NB) + NB + '$';
+  const fmt2 = v => v.toLocaleString('fr-CA',{minimumFractionDigits:2,maximumFractionDigits:2}).replace(/ | |\s/g, NB) + NB + '$';
+  const yrs = n => n + (n > 1 ? ' ans' : ' an');
+  const S = {mode:'save', rate:6, orate:5, kind:'urgence', months:3};
+  const TEXT = {
+    save:{t:'Combien de temps pour <em>mettre de côté</em> ?', l:"Un fonds d'urgence, un voyage, une mise de fonds : choisis ton objectif et ce que tu peux épargner chaque mois."},
+    grow:{t:'Combien ton épargne peut <em>devenir</em> ?', l:'Choisis un montant par mois et une durée. Tu vois ce que tu verses et ce que les intérêts composés ajoutent avec le temps.'},
+    goal:{t:'Combien mettre de côté pour ton <em>objectif</em> ?', l:'Entre ton objectif et ta date : le calcul te donne le montant à épargner chaque mois.'},
+    track:{t:'Où va ton argent <em>ce mois-ci</em> ?', l:'Note ton revenu, tes dépenses et ton épargne. Tu vois en un coup d’œil ce qui reste et si tu atteins ton objectif.'}
+  };
+  function fv(start, monthly, years, rate){ const r = rate/100/12, n = years*12, g = Math.pow(1+r, n); return r ? start*g + monthly*(g-1)/r : start + monthly*n; }
+  function needMonthly(goal, start, years, rate){ const r = rate/100/12, n = years*12, g = Math.pow(1+r, n); const rest = goal - start*g; if (rest <= 0) return 0; return r ? rest*r/(g-1) : rest/n; }
+
+  /* ---------- 1. Épargner ---------- */
+  function updSave(){
+    const urg = S.kind === 'urgence';
+    $('s-exp-field').hidden = !urg; $('s-goal-field').hidden = urg;
+    const target = urg ? Math.max(0, +$('s-exp').value || 0) * S.months : Math.max(0, +$('s-goal').value || 0);
+    const monthly = +$('s-monthly').value, have = Math.max(0, +$('s-have').value || 0);
+    $('s-v-monthly').textContent = fmt(monthly);
+    const left = Math.max(0, target - have), months = monthly > 0 ? Math.ceil(left / monthly) : 0;
+    const pct = target > 0 ? Math.min(100, have / target * 100) : 0;
+    const d = new Date(); d.setMonth(d.getMonth() + months);
+    const when = d.toLocaleDateString('fr-CA', {month:'long', year:'numeric'});
+    if (left === 0){ $('s-eyebrow').textContent = 'Bravo'; $('s-hero').textContent = 'Objectif atteint'; $('s-sentence').innerHTML = `Tu as déjà <b>${fmt(have)}</b>. Prochaine étape : faire grandir le surplus.`; }
+    else { $('s-eyebrow').textContent = 'Tu y arrives dans'; $('s-hero').textContent = months + ' mois';
+      $('s-sentence').innerHTML = `En mettant <b>${fmt(monthly)}</b> de côté chaque mois, tu atteins <b>${fmt(target)}</b> vers <b>${when}</b>.`; }
+    $('s-target').textContent = fmt(target); $('s-left').textContent = fmt(left);
+    $('s-arc').setAttribute('stroke-dashoffset', (339.3 * (1 - pct/100)).toFixed(1)); $('s-pct').textContent = Math.round(pct) + ' %';
+    if (left > 0){ const m2 = Math.ceil(left / (monthly + 50)); const gain = months - m2;
+      $('s-boost').innerHTML = gain > 0 ? `Avec <b>50 $ de plus</b> par mois, tu y arrives <b>${gain} mois plus tôt</b>.` : `Garde le rythme : un virement automatique le jour de la paie rend ça facile.`; }
+    else $('s-boost').innerHTML = `Ton coussin est prêt. Regarde l'onglet <b>Faire grandir</b> pour la suite.`;
+  }
+  function segPick(groupId, attr, cb){ $(groupId).querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $(groupId).querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed','false')); b.setAttribute('aria-pressed','true'); cb(b.dataset[attr]); })); }
+  segPick('s-kind', 'kind', v => { S.kind = v; const presets = {voyage:3000, maison:20000, autre:1000}; if (presets[v]) $('s-goal').value = presets[v]; updSave(); });
+  segPick('s-months', 'm', v => { S.months = +v; updSave(); });
+  ['s-exp','s-goal','s-monthly','s-have'].forEach(id => $(id).addEventListener('input', updSave));
+
+  /* ---------- 2. Faire grandir ---------- */
+  function drawChart(svg, data){
+    const W = 560, H = 230, L = 46, R = 8, T = 10, B = 26;
+    const max = Math.max(...data.map(d => d.total)) * 1.08 || 1, n = data.length, bw = (W-L-R)/n;
+    const p = Math.pow(10, Math.floor(Math.log10(max))), top = Math.ceil(max/p)*p, y = v => T + (H-T-B)*(1 - v/top);
+    let s = '';
+    for (let i = 0; i <= 4; i++){ const v = top*i/4, yy = y(v);
+      s += `<line x1="${L}" x2="${W-R}" y1="${yy}" y2="${yy}" stroke="#2A3D70" stroke-width="1"/><text x="${L-6}" y="${yy+4}" text-anchor="end" font-size="10" fill="#7384AB">${v>=1000? Math.round(v/1000)+'k':Math.round(v)}</text>`; }
+    const step = n > 20 ? 5 : n > 10 ? 2 : 1;
+    data.forEach((d,i) => { const x = L + i*bw + bw*0.14, w = Math.max(1.5, bw*0.72);
+      s += `<rect x="${x}" y="${y(d.paid)}" width="${w}" height="${y(0)-y(d.paid)}" fill="#4285F4" rx="1.5"/><rect x="${x}" y="${y(d.total)}" width="${w}" height="${Math.max(0,y(d.paid)-y(d.total))}" fill="#42D878" rx="1.5"/>`;
+      if (d.y % step === 0 || d.y === n) s += `<text x="${x+w/2}" y="${H-8}" text-anchor="middle" font-size="10" fill="#A9B6D3">${yrs(d.y)}</text>`; });
+    svg.innerHTML = s;
+  }
+  function updGrow(){
+    const years = +$('g-years').value, start = Math.max(0, +$('g-start').value || 0), monthly = +$('g-monthly').value, rate = S.rate;
+    $('g-v-years').textContent = yrs(years); $('g-v-monthly').textContent = fmt(monthly);
+    const total = fv(start, monthly, years, rate), paid = start + monthly*12*years;
+    $('g-eyebrow').textContent = `Dans ${yrs(years)}, tu pourrais avoir`; $('g-hero').textContent = fmt(total);
+    $('g-sentence').innerHTML = `${fmt(monthly)} par mois pendant ${yrs(years)}, si ça rapporte ${rate} %/an. Les intérêts ajoutent <b>${fmt(total-paid)}</b> à ce que tu as versé.`;
+    $('g-paid').textContent = fmt(paid); $('g-gain').textContent = fmt(Math.max(0,total-paid)); $('g-day').textContent = fmt2(monthly*12/365);
+    const data = []; for (let k = 1; k <= years; k++) data.push({y:k, paid:start + monthly*12*k, total:fv(start, monthly, k, rate)}); drawChart($('g-chart'), data);
+    $('g-boost').innerHTML = `Et avec <b>50 $ de plus</b> par mois ? Environ <b>${fmt(fv(start, monthly+50, years, rate) - total)}</b> de plus à la fin.`;
+    const box = $('g-feebox');
+    if ($('g-fees').checked){ const net = fv(start, monthly, years, Math.max(0, rate-2)); box.hidden = false;
+      box.innerHTML = `Avec 2 % de frais par année, le même plan donnerait environ <b>${fmt(net)}</b>, soit <b>${fmt(total-net)}</b> de moins. Les frais comptent autant que le rendement.`; }
+    else box.hidden = true;
+  }
+  ['g-monthly','g-years','g-start','g-fees'].forEach(id => $(id).addEventListener('input', updGrow));
+
+  /* ---------- 3. Objectif ---------- */
+  function updGoal(){
+    const goal = Math.max(0, +$('o-goal').value || 0), years = +$('o-years').value, start = Math.max(0, +$('o-start').value || 0), rate = S.orate;
+    $('o-v-years').textContent = yrs(years);
+    const m = needMonthly(goal, start, years, rate), paid = start + m*12*years, total = fv(start, m, years, rate);
+    $('o-eyebrow').textContent = `Pour ${fmt(goal)} dans ${yrs(years)}, mets de côté`;
+    $('o-hero').textContent = fmt(m) + ' / mois';
+    $('o-sentence').innerHTML = `Si ça rapporte ${rate} %/an, tu verses <b>${fmt(paid)}</b> et les intérêts font le reste.`;
+    $('o-paid').textContent = fmt(paid); $('o-gain').textContent = fmt(Math.max(0,total-paid));
+    $('o-flat').textContent = fmt(Math.max(0, goal-start)/(years*12)) + '/mois';
+    const later = needMonthly(goal, start, Math.max(1, years-5), rate);
+    $('o-boost').innerHTML = years > 5 ? `Le temps aide : si tu attends 5 ans pour commencer, il faudrait <b>${fmt(later)} / mois</b> pour le même objectif.` : `Commence petit : tu pourras augmenter le montant plus tard.`;
+  }
+  ['o-goal','o-years','o-start'].forEach(id => $(id).addEventListener('input', updGoal));
+  document.querySelectorAll('[data-group="rate"]').forEach(g => g.querySelectorAll('.chip').forEach(b => b.addEventListener('click', () => {
+    g.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed','false')); b.setAttribute('aria-pressed','true');
+    if (g.closest('#v-grow')) { S.rate = +b.dataset.rate; updGrow(); } else { S.orate = +b.dataset.rate; updGoal(); } })));
+
+  /* ---------- 4. Suivre mon mois (données dans le navigateur seulement) ---------- */
+  const now = new Date(), KEY = 'beclair-suivi-' + now.getFullYear() + '-' + (now.getMonth()+1);
+  let T = {income:'', goal:'', items:[], sample:false};
+  try { const raw = localStorage.getItem(KEY); if (raw) T = Object.assign(T, JSON.parse(raw)); } catch(e) {}
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(T)); } catch(e) {} };
+  $('t-month').textContent = now.toLocaleDateString('fr-CA', {month:'long', year:'numeric'}).replace(/^./, c => c.toUpperCase());
+  function updTrack(){
+    $('t-income').value = T.income; $('t-goal').value = T.goal;
+    const inc = +T.income || 0, goal = +T.goal || 0;
+    const saved = T.items.filter(i => i.cat === 'Épargne').reduce((a,i) => a + i.amt, 0);
+    const spent = T.items.filter(i => i.cat !== 'Épargne').reduce((a,i) => a + i.amt, 0);
+    const left = inc - spent - saved;
+    $('t-hero').textContent = fmt(saved); $('t-inc').textContent = fmt(inc); $('t-spent').textContent = fmt(spent);
+    $('t-left').textContent = fmt(left); $('t-left').className = left < 0 ? 'k-red' : 'k-blue';
+    const pct = goal > 0 ? Math.min(100, saved/goal*100) : 0;
+    $('t-goal-pct').textContent = goal > 0 ? Math.round(saved/goal*100) + ' %' : '—'; $('t-goal-bar').style.width = pct + '%';
+    const rate = inc > 0 ? saved/inc*100 : 0;
+    $('t-sentence').innerHTML = inc > 0 ? `Tu épargnes <b>${rate.toLocaleString('fr-CA',{maximumFractionDigits:1})} %</b> de ton revenu ce mois-ci.` : `Entre ton revenu pour voir quelle part tu épargnes.`;
+    const byCat = {}; T.items.filter(i => i.cat !== 'Épargne').forEach(i => byCat[i.cat] = (byCat[i.cat]||0) + i.amt);
+    const cats = Object.entries(byCat).sort((a,b) => b[1]-a[1]), mx = cats.length ? cats[0][1] : 1;
+    $('t-cats').innerHTML = cats.length ? cats.map(([c,v]) => `<div class="cat"><span>${c}</span><b class="val" style="font-size:15px">${fmt(v)}</b><div class="bar"><span style="width:${(v/mx*100).toFixed(1)}%"></span></div></div>`).join('') : '<p class="empty">Ajoute tes dépenses pour voir où va ton argent.</p>';
+    $('t-list').innerHTML = T.items.length ? T.items.slice().reverse().map(i => `<div class="entry"><span>${i.cat === 'Épargne' ? '💚 ' : ''}${i.cat}</span><span class="amt ${i.cat==='Épargne'?'k-green':''}">${fmt2(i.amt)}</span><button type="button" data-id="${i.id}" aria-label="Retirer">Retirer</button></div>`).join('') : '<p class="empty">Aucune ligne pour l’instant. Commence par ton épargne du mois.</p>';
+    $('t-list').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { T.items = T.items.filter(i => i.id !== b.dataset.id); save(); updTrack(); }));
+    let tip;
+    if (!T.items.length) tip = `Astuce : note ton épargne <b>en premier</b>, comme une facture à te payer à toi-même.`;
+    else if (left < 0) tip = `Tu dépasses ton revenu de <b>${fmt(-left)}</b>. Regarde la plus grosse catégorie : c'est là qu'un petit ajustement compte le plus.`;
+    else if (goal > 0 && saved >= goal) tip = `Objectif du mois atteint 🎉. Ce qui reste (<b>${fmt(left)}</b>) peut grossir ton fonds d'urgence.`;
+    else if (cats.length) tip = `Ta plus grosse dépense : <b>${cats[0][0]}</b> (${fmt(cats[0][1])}). Réduire de 10 % libère <b>${fmt(cats[0][1]*0.1)}</b> par mois.`;
+    else tip = `Bien parti ! Ajoute tes dépenses pour voir le portrait complet.`;
+    $('t-boost').innerHTML = (T.sample ? '<b>Exemple</b> : ces chiffres sont fictifs, remplace-les par les tiens. ' : '') + tip;
+  }
+  $('t-income').addEventListener('input', e => { T.income = e.target.value; T.sample = false; save(); updTrack(); });
+  $('t-goal').addEventListener('input', e => { T.goal = e.target.value; T.sample = false; save(); updTrack(); });
+  $('t-form').addEventListener('submit', e => { e.preventDefault(); const amt = parseFloat($('t-amt').value);
+    if (!(amt > 0)) { $('t-amt').focus(); return; }
+    if (T.sample) { T.items = []; T.sample = false; }
+    T.items.push({id: Date.now().toString(36) + Math.random().toString(36).slice(2,6), cat: $('t-cat').value, amt: Math.round(amt*100)/100}); $('t-amt').value = ''; save(); updTrack(); });
+  $('t-sample').addEventListener('click', () => {
+    T = {income:'3500', goal:'350', sample:true, items:[['Épargne',350],['Logement',1250],['Épicerie',520],['Transport',280],['Factures',190],['Restos et sorties',240],['Achats',160]].map(([c,a],k) => ({id:'ex'+k, cat:c, amt:a}))};
+    save(); updTrack(); });
+  function resetZone(ask){
+    const z = $('t-reset-zone');
+    z.innerHTML = ask ? `<span>Effacer toutes les lignes de ce mois ?</span><button class="btn danger" id="t-yes" type="button">Oui, effacer</button><button class="btn ghost" id="t-no" type="button">Annuler</button>` : `<button class="btn ghost" id="t-reset" type="button">Recommencer le mois</button>`;
+    if (ask){ $('t-yes').onclick = () => { T = {income:'', goal:'', items:[], sample:false}; save(); updTrack(); resetZone(false); }; $('t-no').onclick = () => resetZone(false); }
+    else $('t-reset').onclick = () => resetZone(true);
+  }
+  resetZone(false);
+  if (!T.items.length && !T.income) { $('t-sample').click(); }
+
+  /* ---------- onglets + partage ---------- */
+  function setMode(m){
+    S.mode = m;
+    document.querySelectorAll('.modes button').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === m));
+    ['save','grow','goal','track'].forEach(k => $('v-'+k).hidden = k !== m);
+    $('title').innerHTML = TEXT[m].t; $('lede').textContent = TEXT[m].l;
+    try { localStorage.setItem('beclair-onglet', m); } catch(e) {}
+  }
+  document.querySelectorAll('.modes button').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+  $('share').addEventListener('click', async () => {
+    const v = $('v-'+S.mode); const hero = v.querySelector('.hero')?.textContent || '', sent = v.querySelector('.sentence')?.textContent || '';
+    const txt = `${hero}. ${sent} — Calculateur BeClair Finance (@beclairfinance)`;
+    try { await navigator.clipboard.writeText(txt); $('share').textContent = 'Copié ✓'; }
+    catch(e){ const r = document.createRange(); r.selectNodeContents(v.querySelector('.sentence')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); $('share').textContent = 'Texte sélectionné'; }
+    setTimeout(() => $('share').textContent = 'Copier mon résultat', 1800);
+  });
+  updSave(); updGrow(); updGoal(); updTrack();
+  let first = 'save'; try { first = localStorage.getItem('beclair-onglet') || 'save'; } catch(e) {}
+  setMode(['save','grow','goal','track'].includes(first) ? first : 'save');
+})();
+</script>
+</body></html>
